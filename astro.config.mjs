@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 
+// Default build format: /articles/index.html. S3 website hosting serves that for /articles/.
 export default defineConfig({
   site: 'https://zdk.sh',
-  // S3 website hosting serves /articles.html for /articles, not /articles/.
-  build: { format: 'file' },
 });
