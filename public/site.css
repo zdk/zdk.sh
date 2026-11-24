@@ -1,0 +1,67 @@
+/* Shared by the Astro layout and the hand-made posts in /articles.
+   Posts load it after their own <style>, so these base rules win. */
+@font-face {
+  font-family: "Geist Mono"; font-weight: 100 900; font-display: swap;
+  src: url(/fonts/geist-mono.woff2) format("woff2");
+}
+
+:root {
+  color-scheme: light dark;
+  --bg: #fcfcfa; --ink: #000; --muted: #646464; --link: #00e;
+  --code-bg: #f3f3f0; --line: #d2d2cd;
+}
+/* Same selector as the posts' dark tokens, so it overrides them. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1e1e1e; --ink: #dcdcdc; --muted: #a0a0a0; --link: #6495ed;
+    --code-bg: #323232; --line: #505050;
+  }
+}
+
+/* The body is the one reading column. Posts' figures may overflow it. */
+body {
+  box-sizing: border-box; max-width: 42rem; margin: 0 auto; padding: 0 1.5rem 2.5rem;
+  background: var(--bg); color: var(--ink);
+  font: .875rem/1.7 "Geist Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+a { color: var(--link); }
+a:hover { opacity: .7; }
+::selection { background: var(--ink); color: var(--bg); }
+
+h1, h2, h3 {
+  font-family: inherit; font-size: inherit; line-height: 1.3;
+  letter-spacing: .02em; text-transform: uppercase;
+}
+h1 { font-size: 1.25rem; margin: 1.5rem 0 .5rem; }
+h2 { margin: 2.5rem 0 .75rem; }
+h3 { margin: 1.75rem 0 .5rem; }
+/* Article bodies get larger headings than the list pages. */
+article h2, .wrap h2 { font-size: 1.5em; }
+article h3, .wrap h3 { font-size: 1.25em; }
+
+.site-nav {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem;
+  padding-block: 1.5rem; text-transform: uppercase;
+}
+.site-nav a { color: inherit; text-decoration: none; }
+.site-nav a:first-child { margin-right: auto; }
+/* Bold does not shift the row: every glyph in a mono font has one width. */
+.site-nav a:hover {
+  opacity: 1; font-weight: 700; text-decoration: underline; text-underline-offset: .2em;
+}
+.site-nav img { display: block; border-radius: 50%; }
+
+.muted { color: var(--muted); }
+.meta { color: var(--muted); font-size: .75rem; }
+time { white-space: nowrap; }
+ul.plain { list-style: "- "; padding-left: 2ch; }
+ul.plain li { margin: .25em 0; }
+ul.plain li::marker { color: var(--muted); }
+footer { margin-top: 4rem; }
+
+code {
+  font-family: inherit; font-size: .875em; padding: .125rem .25rem;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 0;
+}
+pre { overflow-x: auto; padding: .85em 1.15em; background: var(--code-bg); }
+pre code { padding: 0; background: none; border: 0; }

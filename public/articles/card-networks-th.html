@@ -1,0 +1,484 @@
+<meta charset="utf-8">
+<title>ตามเงิน ฿1,000 ผ่าน Visa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;700&family=IBM+Plex+Sans+Thai:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F6F6F3; --ink: #1A1C1E; --muted: #5F6468; --line: #C9CCC7;
+    --surface: #FFFFFF; --slab-top: #E6E8E3; --slab-side: #D5D8D2;
+    --accent: #1F7A52; --accent-soft: #D9EDE2; --alert: #B9453A; --alert-soft: #F4DEDB;
+    --code-bg: #ECEDE9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131516; --ink: #E7E5DF; --muted: #9AA09B; --line: #3A3F3D;
+      --surface: #1B1E1F; --slab-top: #272B2C; --slab-side: #212425;
+      --accent: #4CC48A; --accent-soft: #1E3A2C; --alert: #E0665A; --alert-soft: #40241F;
+      --code-bg: #202323;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131516; --ink: #E7E5DF; --muted: #9AA09B; --line: #3A3F3D;
+    --surface: #1B1E1F; --slab-top: #272B2C; --slab-side: #212425;
+    --accent: #4CC48A; --accent-soft: #1E3A2C; --alert: #E0665A; --alert-soft: #40241F;
+    --code-bg: #202323;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); margin: 0; padding-block: 48px 96px; padding-inline: 20px;
+         font: 17px/1.8 "IBM Plex Sans Thai", "IBM Plex Sans", system-ui, sans-serif; }
+  .wrap { max-width: 660px; margin: 0 auto; }
+  h1, h2, h3 { font-family: "Prompt", "IBM Plex Sans Thai", sans-serif; text-wrap: balance; line-height: 1.25; }
+  h1 { font-size: clamp(34px, 6.5vw, 54px); font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h2 { font-size: 28px; font-weight: 700; margin: 72px 0 12px; }
+  h3 { font-size: 19px; font-weight: 700; margin: 36px 0 8px; }
+  p { margin: 0 0 18px; }
+  a { color: var(--accent); }
+  .lede { font-size: 1.15em; color: var(--muted); margin-bottom: 36px; }
+  .eyebrow { font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .lang { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .stage { font: 600 13px/1.4 "IBM Plex Mono", "IBM Plex Sans Thai", monospace; letter-spacing: .04em; color: var(--muted); display: block; margin-bottom: 6px; }
+  code { font: 15px "IBM Plex Mono", monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+  ul { padding-left: 22px; } li { margin-bottom: 6px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 48px 0; }
+
+  /* figures break out of the reading column */
+  figure { margin: 32px calc(50% - min(50vw - 20px, 450px)); }
+  figure svg { width: 100%; height: auto; display: block; font: 13px "IBM Plex Mono", "IBM Plex Sans Thai", monospace; }
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
+  figcaption { color: var(--muted); font-size: .88em; min-height: 2.8em; flex: 1; }
+  .replay { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 3px;
+            padding: 5px 12px; font: 13px "IBM Plex Sans Thai", "IBM Plex Mono", monospace; cursor: pointer; white-space: nowrap; }
+  .replay:hover, .replay:focus-visible { border-color: var(--accent); outline: none; }
+
+  /* svg parts */
+  .node text { fill: var(--ink); font-weight: 600; }
+  .node .sub { fill: var(--muted); font-weight: 400; font-size: 11px; }
+  .node .face { transition: stroke .25s; }
+  .node.active .face { stroke: var(--accent); }
+  .node.alert .face { stroke: var(--alert); }
+  .wire { stroke: var(--line); stroke-width: 1.5; }
+  .wire.lit { stroke: var(--accent); }
+  .wire.alert { stroke: var(--alert); }
+  .packet { fill: var(--accent); }
+  .packet.alert { fill: var(--alert); }
+  .plabel { fill: var(--accent); font-size: 11px; text-anchor: middle; font-weight: 600; }
+  .plabel.alert { fill: var(--alert); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* running ledger */
+  .ledger { border: 1px solid var(--line); background: var(--surface); padding: 14px 18px; margin: 24px 0 8px; font: .82em/1.8 "IBM Plex Sans Thai", "IBM Plex Mono", monospace; }
+  .ledger b { display: block; font-weight: 600; color: var(--muted); font-size: 12px; letter-spacing: .04em; margin-bottom: 6px; }
+  .ledger div { display: flex; justify-content: space-between; gap: 16px; }
+  .ledger span:last-child { font-family: "IBM Plex Mono", "IBM Plex Sans Thai", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ledger .in { color: var(--accent); } .ledger .out { color: var(--alert); }
+
+  table { border-collapse: collapse; width: 100%; font-size: .88em; margin: 16px 0 24px; }
+  td, th { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; font-size: 13px; color: var(--muted); }
+  td.n, th.n { text-align: right; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+  .note { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; color: var(--muted); margin: 24px 0; }
+  .src { font-size: .88em; color: var(--muted); }
+</style>
+<link rel="stylesheet" href="/site.css">
+<nav class="site-nav">
+  <a href="/"><img src="/avatar.jpg" alt="zdk" width="40" height="40"></a>
+  <a href="/articles">Articles</a>
+  <a href="/projects">Projects</a>
+  <a href="https://github.com/zdk">GitHub</a>
+</nav>
+
+<div class="wrap" lang="th">
+  <div class="eyebrow">Payments, explained by one receipt</div>
+  <h1>ตามเงิน ฿1,000 ผ่าน Visa</h1>
+  <p class="lang"><a href="/articles/card-networks.html">Read in English</a></p>
+  <p class="lede">คุณแตะบัตรเครดิต KBank ที่ร้านซ่อมจักรยานในเชียงใหม่ หน้าจอเครื่องรูดขึ้นว่า <em>อนุมัติ</em> ภายในไม่ถึงสองวินาที นี่คือทุกอย่างที่เกิดขึ้นเบื้องหลัง งานสี่อย่างที่เครือข่ายบัตรทำ และเหตุผลที่ร้านข้าง ๆ รับแค่พร้อมเพย์</p>
+
+  <p>เริ่มจากสิ่งที่ Visa และ Mastercard <strong>ไม่ได้ทำ</strong> เพราะคนส่วนใหญ่เดาผิด พวกเขาไม่ได้ออกบัตรให้คุณ ธนาคารกสิกรไทยต่างหากที่ออก พวกเขาไม่ได้ไปเซ็นสัญญากับร้านจักรยานหรือเอาเครื่องรูดไปวางให้ นั่นเป็นงานของธนาคารผู้รับบัตรอย่าง SCB หรือบริษัทรับชำระเงินอย่าง 2C2P และ Omise พวกเขาไม่ได้พิมพ์บัตร ไม่ได้ผลิตเครื่อง และไม่ได้ให้คุณกู้เงิน</p>
+
+  <p>สิ่งที่พวกเขาทำคือดูแล <strong>เครือข่าย</strong> จริง ๆ แล้วมีสองเครือข่าย เครือข่ายโทรคมนาคมที่ส่งข้อความ และเครือข่ายธนาคารที่โยกเงิน บนสองอย่างนั้นมีตารางค่าธรรมเนียมและกฎเกณฑ์วางทับอยู่ ทั้งบริษัทมีแค่นี้ ถ้าอยากเห็นว่าแต่ละส่วนสำคัญอย่างไร ให้ตามเงินก้อนเดียวตั้งแต่แตะบัตร ไปจนถึงใบเสร็จ และไปจนถึงยอดในบัญชีธนาคาร</p>
+
+  <figure id="fig-market">
+    <svg viewBox="0 0 900 250" role="img" aria-label="ฝั่งผู้ออกบัตรและฝั่งผู้รับบัตรเชื่อมกันผ่านเครือข่ายบัตรเท่านั้น"></svg>
+    <div class="bar"><figcaption>สองฝั่งของการจ่ายด้วยบัตรทุกครั้ง สองฝั่งนี้ไม่เคยคุยกันตรง ๆ ทุกข้อความและทุกบาทต้องผ่านเครือข่ายตรงกลาง</figcaption></div>
+  </figure>
+
+  <p>ร้านจักรยานถามกสิกรไทยไม่ได้ว่าบัตรของคุณใช้ได้ไหม เพราะร้านไม่มีความสัมพันธ์อะไรกับกสิกรไทย ร้านเจอบัตรจากทุกธนาคารในไทย และในเชียงใหม่ก็เจอบัตรจากธนาคารในญี่ปุ่น จีน และเยอรมนีด้วย เครือข่ายบัตรคือคู่สัญญาเดียวที่ทุกคนมีเหมือนกัน มันจึงกลายเป็นเส้นทางเดียวที่ทุกอย่างต้องวิ่งผ่าน</p>
+
+  <p class="note">พร้อมเพย์ดูเหมือนจะข้ามตัวกลางไปเลย แต่ไม่ใช่ มันคือเครือข่ายอีกอันหนึ่ง เป็นระบบสวิตช์ในประเทศที่ National ITMX ดูแลภายใต้ธนาคารแห่งประเทศไทย และมีวิธีคิดค่าธรรมเนียมคนละแบบ จำเรื่องนี้ไว้ถึงขั้นที่ 3</p>
+
+  <h2><span class="stage">ขั้นที่ 1 · 0 ถึง 2 วินาที</span>ขออนุมัติ</h2>
+
+  <p>เครื่องรูดอ่านหมายเลขบัตร ซึ่งเรียกว่า PAN เลขหกถึงแปดหลักแรกคือ BIN หรือหมายเลขประจำธนาคารผู้ออกบัตร ให้คิดว่า PAN คือ IP address และ BIN คือ prefix สำหรับหาเส้นทาง เครือข่ายดู BIN แล้วรู้ทันทีว่าต้องส่งข้อความไปที่ธนาคารไหน ไม่ต้องรู้อย่างอื่นเลย</p>
+
+  <figure id="fig-auth">
+    <svg viewBox="0 0 900 170" role="img" aria-label="คำขออนุมัติเดินทางจากผู้ถือบัตรผ่านร้านค้า ผู้รับบัตร และเครือข่าย ไปถึงผู้ออกบัตร แล้วคำอนุมัติเดินทางกลับ"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">เล่นใหม่ ↻</button></div>
+  </figure>
+
+  <p>เจ็ดช่วง และเมื่อจบลงสิ่งที่ขยับมีแค่คำสัญญา ทีนี้ลองเอาเงิน ฿1,000 ก้อนเดียวกันไปจ่ายที่ร้านข้าง ๆ ซึ่งรับแค่พร้อมเพย์</p>
+
+  <figure id="fig-promptpay">
+    <svg viewBox="0 0 900 170" role="img" aria-label="สแกน QR พร้อมเพย์ แล้วเงินโอนจากธนาคารของคุณผ่าน National ITMX ไปยังธนาคารของร้าน และร้านได้รับเงิน"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">เล่นใหม่ ↻</button></div>
+  </figure>
+
+  <p>ห้าช่วง และเงินออกจากบัญชีตั้งแต่ช่วงที่สอง เส้นทางบัตรคือการถามว่า <em>ขอได้ไหม</em> แล้วเงินค่อยตามมาในวันถัดไป เส้นทางพร้อมเพย์คือคำสั่งว่า <em>โอน</em> และสวิตช์ต้องรู้แค่ว่าหมายเลขนี้เป็นของธนาคารไหน นั่นคือเหตุผลที่มันเร็วกว่า ถูกกว่า และไม่มีอะไรให้ย้อนกลับ จำภาพทั้งสองไว้ ขั้นที่ 2 ถึง 4 คือเครือข่ายบัตรทำงานที่พร้อมเพย์ข้ามไป</p>
+
+  <p>Mastercard เรียกงานนี้ว่า <em>switching</em> ซึ่งเป็นภาพในหัวที่ถูกต้อง เครือข่ายคือสวิตช์ส่งข้อมูลที่แพงมากและระวังมาก Visa มีศูนย์ข้อมูลของตัวเองและเช่าสายไฟเบอร์ของตัวเอง ศูนย์หลักในสหรัฐฯ สร้างให้ทนแผ่นดินไหวและลมแรง 170 ไมล์ต่อชั่วโมง มีเสากั้นรถแบบไฮดรอลิก และมีคูน้ำล้อมรอบจริง ๆ</p>
+
+  <p>ไทยก็มีสวิตช์ของตัวเองเช่นกัน ธนาคารแห่งประเทศไทยกำหนดให้รายการบัตรเดบิตในประเทศต้องถูกสวิตช์ภายในประเทศ นี่คือเหตุผลที่บัตรเดบิตไทยมีตรา TPN หรือ Thai Payment Network อยู่ข้าง ๆ หรือแทนที่ Visa และ Mastercard ส่วนรายการบัตรเครดิตของคุณยังวิ่งบน Visa</p>
+
+  <p>คำอนุมัติยังไม่ใช่การจ่ายเงิน มันคือ <strong>การกันวงเงิน</strong> กสิกรไทยกันวงเงิน ฿1,000 ของคุณไว้และสัญญาว่าจะจ่าย ร้านจักรยานยังไม่ได้รับอะไรเลย พอสิ้นวัน ร้านส่งข้อความชุดที่สองที่เรียกว่า <strong>clearing</strong> พร้อมยอดสุดท้าย clearing คือสิ่งที่เปลี่ยนคำสัญญาให้เป็นหนี้</p>
+
+  <aside class="ledger"><b>เงิน ฿1,000 อยู่ที่ไหน · จบขั้นที่ 1</b>
+    <div><span>วงเงินบัตรเครดิต KBank ของคุณ</span><span class="out">−฿1,000.00 (กันไว้)</span></div>
+    <div><span>ร้านจักรยาน</span><span>฿0.00 (ได้รับคำสัญญา)</span></div>
+  </aside>
+
+  <h2><span class="stage">ขั้นที่ 2 · ข้ามคืน</span>ชำระดุล</h2>
+
+  <p>ทีนี้เงินต้องขยับจริง กสิกรไทยเป็นหนี้ผู้รับบัตรของร้านจักรยาน ฿1,000 แต่กสิกรไทยก็เป็นหนี้ผู้รับบัตรรายอื่นทุกรายสำหรับบัตรกสิกรทุกใบที่ถูกใช้วันนี้ และธนาคารผู้ออกบัตรรายอื่นทุกรายก็เป็นหนี้ผู้รับบัตรของร้านสำหรับบัตรทุกใบที่ร้านรับ หนี้ก้อนเล็ก ๆ นับล้านรายการ ไขว้กันไปมา</p>
+
+  <p>งานที่สองของเครือข่ายคือเป็นคู่สัญญาตรงกลาง มันมีบัญชีชำระดุลกับผู้ออกบัตรทุกรายและผู้รับบัตรทุกราย จึงเก็บเงินจากฝั่งหนึ่งแล้วจ่ายอีกฝั่งได้ และมันไม่ได้ชำระทีละรายการ มันหักกลบ</p>
+
+  <figure id="fig-settle">
+    <svg viewBox="0 0 900 260" role="img" aria-label="รายการสิบสองรายการระหว่างผู้ออกบัตรไทยสามรายและผู้รับบัตรสามราย ยุบรวมเป็นการโอนสุทธิหกรายการผ่านเครือข่าย"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">เล่นใหม่ ↻</button></div>
+  </figure>
+
+  <p>ภายในประเทศไทย เรื่องนี้ค่อนข้างเป็นงานประจำ Visa ชำระดุลรายการในประเทศเป็นเงินบาท และธนาคารเคลียร์กันผ่านบาทเนต ระบบโอนเงินระหว่างธนาคารของแบงก์ชาติ กรณีที่น่าสนใจคือนักท่องเที่ยวญี่ปุ่นโต๊ะข้าง ๆ ธนาคารผู้ออกบัตรของเธออยู่ที่โตเกียวและจ่ายเป็นเยน ผู้รับบัตรของร้านจักรยานอยู่ที่กรุงเทพฯ และต้องการบาท Visa มีความสัมพันธ์กับธนาคารในทั้งสองประเทศ แปลงสกุลเงินให้ และแต่ละธนาคารติดต่อแค่ธนาคารท้องถิ่นของ Visa เท่านั้น เครือข่ายคือตัวแปลงระหว่างระบบธนาคารของแต่ละประเทศ ถ้าไม่มีมัน ผู้รับบัตรไทยทุกรายต้องไปหาธนาคารตัวแทนในทุกประเทศที่นักท่องเที่ยวมาจาก</p>
+
+  <p>การเป็นคู่สัญญาตรงกลางยังเป็นจุดที่ความเสี่ยงจริงอยู่ ถ้าธนาคารหนึ่งจ่ายเข้าไม่ได้ Visa ก็ยังต้องจ่ายออก จากรายงานประจำปี 2024 ของ Visa เป็นดอลลาร์สหรัฐเพราะความเสี่ยงนี้เป็นระดับโลก</p>
+
+  <table>
+    <tr><th>ปีงบประมาณ 2024</th><th class="n">จำนวน</th></tr>
+    <tr><td>สภาพคล่องที่กันไว้เผื่อธนาคารชำระดุลไม่ได้</td><td class="n">$11.2B</td></tr>
+    <tr><td>ยอดค้างชำระเฉลี่ยต่อวัน</td><td class="n">$84.3B</td></tr>
+    <tr><td>ยอดค้างชำระสูงสุดในวันเดียว</td><td class="n">$137.4B</td></tr>
+  </table>
+
+  <aside class="ledger"><b>เงิน ฿1,000 อยู่ที่ไหน · จบขั้นที่ 2</b>
+    <div><span>KBank ผ่านเครือข่าย</span><span class="out">−฿1,000.00 (จ่ายแล้ว)</span></div>
+    <div><span>ผู้รับบัตรของร้านจักรยาน</span><span class="in">+฿1,000.00</span></div>
+    <div><span>คุณ</span><span>ติดหนี้ KBank ฿1,000 รอบบิลหน้า</span></div>
+  </aside>
+
+  <h2><span class="stage">ขั้นที่ 3 · ค่าธรรมเนียม</span>แบ่งเงิน</h2>
+
+  <p>ร้านจักรยานไม่ได้รับ ฿1,000 เต็ม รายการบัตรเครดิตทั่วไปในไทย ร้านจะได้ประมาณ ฿975 ส่วนที่หายไป ฿25 คือ <strong>ค่าธรรมเนียมร้านค้า</strong> หรือ MDR และปลายทางของเงินก้อนนี้อธิบายเกือบทุกอย่างว่าทำไมบัตรถึงทำงานแบบที่มันเป็น และทำไมร้านไทยจำนวนมากถึงอยากให้คุณสแกน QR มากกว่า</p>
+
+  <figure id="fig-fee">
+    <svg viewBox="0 0 900 250" role="img" aria-label="แท่ง 1,000 บาทที่ถูกตัดออก 25 บาท ขยายให้เห็นว่า 20 บาทไปที่ผู้ออกบัตร 3.50 บาทไปที่โปรเซสเซอร์ และ 1.50 บาทไปที่เครือข่าย"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">เล่นใหม่ ↻</button></div>
+  </figure>
+
+  <p>อ่านอีกครั้ง บริษัทที่มีชื่ออยู่บนบัตรได้บาทครึ่ง ธนาคารที่ออกบัตรได้ยี่สิบบาท เครือข่ายเป็นคนกำหนดตัวเลขทั้งสองนี้เอง และตั้งใจจ่ายให้ตัวเองน้อยที่สุด</p>
+
+  <p>เหตุผลที่ให้ไว้คือความเสี่ยง ถ้าบัตรคุณถูกขโมย กฎ zero-liability ทำให้กสิกรไทยรับผิดชอบความเสียหาย ไม่ใช่คุณ และไม่ใช่ร้าน ถ้าคุณไม่จ่ายบิล กสิกรไทยก็จ่ายร้านไปแล้วอยู่ดี ยี่สิบบาทคือราคาของการรับประกันนั้น ร้านค้าจะบอกว่ามันคือราคาของการผูกขาดสองรายด้วย และพวกเขาก็ไม่ได้ผิดทั้งหมด</p>
+
+  <p>แต่ส่วนแบ่งก้อนโตของผู้ออกบัตรก็เป็นเครื่องยนต์ด้วย สองเปอร์เซ็นต์จากทุกการรูด คือเงินที่จ่ายเงินคืน ไมล์สายการบิน และโปรผ่อน 0% 10 เดือนที่ธนาคารไทยโฆษณาอยู่ทุกห้าง รางวัลดึงผู้ถือบัตร ผู้ถือบัตรดึงร้านค้า ร้านค้ามากขึ้นทำให้บัตรมีประโยชน์มากขึ้น แล้วก็ดึงผู้ถือบัตรเพิ่มอีก เครือข่ายได้เศษเสี้ยวจากพายที่โตขึ้นเรื่อย ๆ</p>
+
+  <h3>ทำไมร้านก๋วยเตี๋ยวถึงบอกว่ารับแค่พร้อมเพย์</h3>
+
+  <p>ทีนี้ลองเอา ฿1,000 ก้อนเดียวกันผ่านพร้อมเพย์ แบงก์ชาติกำหนดราคาให้การโอนของผู้บริโภคฟรี และการจ่ายผ่าน QR ร้านค้าแทบไม่มีค่าใช้จ่าย ไม่มี interchange ก็เลยไม่มีเครื่องยนต์รางวัล แต่ก็ไม่มี ฿25 ไหลออกจากลิ้นชักด้วย สำหรับร้านเล็กที่กำไรบาง แค่นี้ก็ตัดสินได้แล้ว</p>
+
+  <p>แบงก์ชาติยังกำหนดเพดานค่าธรรมเนียมบัตรเดบิตสำหรับร้านค้าไว้ที่ 0.55% นี่คือเหตุผลที่บัตรเดบิตของคุณถูกสำหรับร้าน แต่บัตรเครดิตไม่ถูก และมันคือเหตุผลที่ป้าย "บัตรเครดิต +3%" ตามตลาดมีอยู่ การผลักค่าธรรมเนียมให้ลูกค้าผิดกฎเครือข่าย แต่ไม่มีใครสนใจจะไปไล่จับแผงในจตุจักร</p>
+
+  <p class="note">สหภาพยุโรปได้ผลลัพธ์แบบเดียวกันด้วยกฎหมาย โดยกำหนดเพดาน interchange ไว้ที่ 0.3% ไทยได้มาด้วยการสร้างคู่แข่งของรัฐขึ้นมา ไม่ว่าทางไหน พอร้านค้ามีรางที่แทบฟรีให้ใช้ รางวัลบัตรก็บางลง และการรับบัตรก็เลือกมากขึ้น</p>
+
+  <aside class="ledger"><b>เงิน ฿1,000 อยู่ที่ไหน · หลังหักค่าธรรมเนียม</b>
+    <div><span>ร้านจักรยาน</span><span class="in">+฿975.00</span></div>
+    <div><span>KBank (interchange)</span><span class="in">+฿20.00</span></div>
+    <div><span>ผู้รับบัตร / โปรเซสเซอร์</span><span class="in">+฿3.50</span></div>
+    <div><span>Visa (ค่าธรรมเนียมเครือข่าย)</span><span class="in">+฿1.50</span></div>
+  </aside>
+
+  <h2><span class="stage">ขั้นที่ 4 · เมื่อมีปัญหา</span>ข้อพิพาท</h2>
+
+  <p>สมมติว่าจักรยานไม่ได้ซ่อมเลย และร้านหยุดตอบ LINE ถ้าจ่ายด้วยเงินสดหรือพร้อมเพย์ ทางออกของคุณคือ สคบ. หรือศาลแขวง และเงินก็หายไปแล้ว ถ้าจ่ายด้วยบัตร คุณโทรหากสิกรไทย งานที่สี่ของเครือข่ายคือเขียนกฎที่ทำให้สายนั้นมีผล</p>
+
+  <p>คู่มือกฎของ Visa หนา 923 หน้าและเปิดเผยต่อสาธารณะ มันครอบคลุมตั้งแต่วิธีพิมพ์โลโก้ ข้อมูลที่รายการต้องมี แต่ละฝ่ายต้องตอบเร็วแค่ไหน และที่สำคัญที่สุด ใครรับผิดชอบเมื่อไหร่ ธนาคารที่ทำผิดกฎเจอค่าปรับตั้งแต่ $25,000 ถึง $1,000,000 ต่อเดือน หรือถูกไล่ออกจากเครือข่าย</p>
+
+  <figure id="fig-dispute">
+    <svg viewBox="0 0 900 170" role="img" aria-label="รายการปฏิเสธการชำระเงินวิ่งไปมาระหว่างผู้ออกบัตรและผู้รับบัตรหลายรอบ ก่อนส่งให้เครือข่ายตัดสิน"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">เล่นใหม่ ↻</button></div>
+  </figure>
+
+  <p>สังเกตว่าเครือข่ายแทบไม่โผล่มาเลย ข้อพิพาทคือการบังคับอนุญาโตตุลาการระหว่างกสิกรไทยกับผู้รับบัตรของร้าน ทั้งสองส่งหลักฐานโต้กันไปมาจนฝ่ายหนึ่งยอมแพ้และรับผิดชอบความเสียหาย Visa จะเข้ามาก็ต่อเมื่อไม่มีใครยอม และคิดค่าดู $600 อุทธรณ์ $1,000 ฝ่ายแพ้จ่าย บวกกับยอดที่พิพาท สำหรับค่าซ่อม ฿1,000 ค่ากรรมการนั้นแพงกว่าบิลราวยี่สิบเท่า</p>
+
+  <p>ค่าธรรมเนียมเหล่านั้นคือการออกแบบ ไม่มีใครอยากไปถึงกรรมการ ผู้ออกบัตรมักคืนเงินลูกค้าเองแล้วตัดเป็นหนี้สูญถ้ายอดเล็ก ร้านค้าคืนเงินลูกค้าที่ไม่พอใจเองเพราะผู้รับบัตรเก็บค่าธรรมเนียมข้อพิพาททันทีที่มีการปฏิเสธรายการ ไม่ว่าจะชนะหรือแพ้ กฎเหล่านี้ไม่ได้แก้ข้อพิพาทเท่ากับทำให้ข้อพิพาทแพงพอที่ทุกคนจะเคลียร์กันเองก่อน</p>
+
+  <p>มันไม่ใช่ระบบที่ยุติธรรม แต่มันเร็ว และมันเอียงไปทางผู้ถือบัตร ซึ่งเป็นสิ่งที่ทำให้นักท่องเที่ยวกล้ายื่นบัตรให้คนแปลกหน้าในประเทศที่พวกเขาจะไม่มีวันขึ้นศาล ความคุ้มครองนั้นคือสิ่งเดียวที่พร้อมเพย์ไม่ให้คุณ การโอนผ่าน QR เป็นที่สิ้นสุดทันทีที่คุณกดยืนยัน</p>
+
+  <hr>
+
+  <h2>ถ้าจะสร้างเครือข่ายเอง ต้องมีอะไรบ้าง</h2>
+
+  <p>ถอดแบรนด์ออก เครือข่ายบัตรคือสี่อย่าง ไทยสร้างของตัวเองขึ้นมาจริง ๆ รายการตรวจสอบเลยมีคอลัมน์ไทยด้วย</p>
+
+  <table>
+    <tr><th>งาน</th><th>คืออะไร</th><th>Visa</th><th>พร้อมเพย์</th></tr>
+    <tr><td>สวิตช์</td><td>ส่งข้อความไปถึงธนาคารที่ถูกต้องในไม่ถึงวินาที</td><td>VisaNet ตาม BIN</td><td>National ITMX ตามเบอร์โทรหรือเลขบัตรประชาชน</td></tr>
+    <tr><td>ชำระดุล</td><td>หักกลบและโยกเงินระหว่างธนาคาร</td><td>Visa เป็นคู่สัญญา ทุกสกุลเงิน</td><td>บาทเนต เงินบาทเท่านั้น</td></tr>
+    <tr><td>ตั้งราคา</td><td>กำหนดค่าธรรมเนียมให้ทั้งสองฝั่งอยากเข้าร่วม</td><td>interchange ราว 2% เลี้ยงระบบรางวัล</td><td>เกือบศูนย์ แบงก์ชาติกำหนด</td></tr>
+    <tr><td>ออกกฎ</td><td>กฎความรับผิดและกระบวนการข้อพิพาท</td><td>923 หน้า มี chargeback</td><td>โอนแล้วเป็นที่สิ้นสุด</td></tr>
+  </table>
+
+  <p>ข้อแรกคือวิศวกรรม ข้อสองคืองบดุล ข้อสามและสี่คือทางเลือก ไทยเลือกถูกและสิ้นสุด Visa เลือกแพงและย้อนกลับได้ ทั้งคู่เป็นเครือข่าย ใบเสร็จแค่บอกว่าคุณนั่งรางไหนมา</p>
+
+  <p class="src">แหล่งอ้างอิงและอ่านต่อ: <a href="https://tautology.town/2026/06/01/card-networks.html">What do Visa and Mastercard do?</a> (tautology.town) ซึ่งหน้านี้นำมาเรียบเรียงใหม่ในบริบทไทย; Visa Inc. 2024 Form 10-K สำหรับตัวเลขการชำระดุล; Visa Core Rules and Visa Product and Service Rules สำหรับค่าธรรมเนียมข้อพิพาท; ประกาศธนาคารแห่งประเทศไทยเรื่อง MDR บัตรเดบิตและค่าธรรมเนียมพร้อมเพย์ การแบ่ง ฿25 เป็นตัวอย่างค่าเฉลี่ยบัตรเครดิตไทย อัตราจริงต่างกันตามประเภทบัตร ประเภทร้านค้า และผู้รับบัตร</p>
+</div>
+
+<script>
+// ---------- shared bits ----------
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp01 = t => Math.min(1, Math.max(0, t));
+const ease = t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+const money = n => '฿' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Isometric slab: front face + top + right side. Colors come from theme tokens.
+function slab(x, y, w, h, label, sub = '') {
+  const d = 8;
+  return `<g class="node" transform="translate(${x},${y})">
+    <path class="face" d="M0,${d} L${d},0 H${w + d} L${w},${d}Z" fill="var(--slab-top)" stroke="var(--line)"/>
+    <path class="face" d="M${w},${d} L${w + d},0 V${h - d} L${w},${h}Z" fill="var(--slab-side)" stroke="var(--line)"/>
+    <path class="face" d="M0,${d} H${w} V${h} H0Z" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="${w / 2}" y="${h / 2 + d + (sub ? -2 : 4)}" text-anchor="middle">${label}</text>
+    ${sub ? `<text class="sub" x="${w / 2}" y="${h / 2 + d + 14}" text-anchor="middle">${sub}</text>` : ''}
+  </g>`;
+}
+
+// Player: render(t) is pure. Page shows the final frame at rest, plays on scroll, replays on click.
+function player(fig, duration, render) {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let raf, start;
+  const stop = () => cancelAnimationFrame(raf);
+  const play = () => {
+    stop();
+    if (reduced) return render(duration);
+    start = performance.now();
+    const tick = now => {
+      const t = (now - start) / 1000;
+      render(Math.min(t, duration));
+      if (t < duration) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  };
+  render(duration);
+  fig.querySelector('.replay').onclick = play;
+  new IntersectionObserver(([e]) => e.isIntersecting ? play() : stop(), { threshold: .4 }).observe(fig);
+}
+
+// ---------- market figure (static) ----------
+(function () {
+  const svg = document.querySelector('#fig-market svg');
+  svg.innerHTML = `
+    <text x="130" y="22" fill="var(--muted)" font-size="11">ฝั่งผู้ออกบัตร</text>
+    <text x="770" y="22" text-anchor="end" fill="var(--muted)" font-size="11">ฝั่งผู้รับบัตร</text>
+    <rect x="30" y="34" width="250" height="200" fill="none" stroke="var(--line)" stroke-dasharray="3 4"/>
+    <rect x="620" y="34" width="250" height="200" fill="none" stroke="var(--line)" stroke-dasharray="3 4"/>
+    ${slab(70, 60, 160, 56, 'ผู้ออกบัตร', 'KBank · SCB · Krungsri')}
+    ${slab(70, 150, 160, 56, 'ผู้ถือบัตร', 'คุณ')}
+    ${slab(660, 60, 160, 56, 'ผู้รับบัตร', 'SCB · 2C2P · Omise')}
+    ${slab(660, 150, 160, 56, 'ร้านค้า', 'ร้านจักรยาน')}
+    <line class="wire" x1="150" y1="116" x2="150" y2="150"/>
+    <line class="wire" x1="740" y1="116" x2="740" y2="150"/>
+    ${slab(360, 100, 170, 60, 'เครือข่ายบัตร', 'Visa · Mastercard')}
+    <line class="wire lit" x1="280" y1="134" x2="360" y2="134"/>
+    <line class="wire lit" x1="538" y1="134" x2="620" y2="134"/>
+    <text x="450" y="200" text-anchor="middle" fill="var(--muted)" font-size="11">ไม่มีเส้นทางตรงระหว่างสองฝั่ง</text>`;
+})();
+
+// ---------- generic flow figure: nodes in a row, packet steps ----------
+const QR = ['1111101', '1000101', '1011100', '1000110', '1111101', '0000011', '1110110'];
+function flowFigure(id, names, steps, duration, top = 70) {
+  const fig = document.getElementById(id), svg = fig.querySelector('svg'), cap = fig.querySelector('figcaption');
+  const W = 140, H = 56, GAP = (840 - names.length * W) / (names.length - 1);
+  const centers = names.map((_, i) => [30 + i * (W + GAP) + W / 2, top + H / 2]);
+  svg.innerHTML =
+    centers.slice(1).map(([x2, y], i) =>
+      `<line class="wire" x1="${centers[i][0] + W / 2 + 8}" y1="${y}" x2="${x2 - W / 2}" y2="${y}"/>`).join('') +
+    names.map((n, i) => slab(30 + i * (W + GAP), top, W, H, ...[].concat(n))).join('') +
+    `<circle class="packet" r="6"/><text class="plabel"></text>` +
+    // Thai QR glyph: flies above the row when a step is a scan, not a message
+    `<g class="qr" opacity="0"><rect x="-14" y="-14" width="28" height="28" fill="var(--surface)" stroke="var(--line)"/>` +
+      QR.flatMap((row, r) => [...row].map((c, i) => c === '1' ? `<rect x="${-10.5 + i * 3}" y="${-10.5 + r * 3}" width="3" height="3" fill="var(--ink)"/>` : '')).join('') +
+    `</g>`;
+  const nodeEls = [...svg.querySelectorAll('.node')], wireEls = [...svg.querySelectorAll('.wire')];
+  const packet = svg.querySelector('.packet'), label = svg.querySelector('.plabel'), qr = svg.querySelector('.qr');
+
+  function render(t) {
+    nodeEls.forEach(n => n.classList.remove('active', 'alert'));
+    wireEls.forEach(w => w.classList.remove('lit', 'alert'));
+    const step = steps.find(s => t >= s.t0 && t <= s.t1) || [...steps].reverse().find(s => t > s.t1);
+    if (!step) return;
+    const p = ease(clamp01((t - step.t0) / (step.t1 - step.t0)));
+    const [x1, y] = centers[step.a], [x2] = centers[step.b];
+    const cls = step.alert ? 'alert' : 'lit';
+    const x = lerp(x1, x2, p);
+    packet.setAttribute('opacity', step.qr ? 0 : 1);
+    qr.setAttribute('opacity', step.qr ? 1 : 0);
+    if (step.qr) {
+      qr.setAttribute('transform', `translate(${x},${y - 60})`);   // over the top of the row
+      label.setAttribute('x', x); label.setAttribute('y', y - 82);
+    } else {
+      packet.setAttribute('cx', x); packet.setAttribute('cy', y);
+      packet.classList.toggle('alert', !!step.alert);
+      label.setAttribute('x', x); label.setAttribute('y', y - 16);
+      for (let i = Math.min(step.a, step.b); i < Math.max(step.a, step.b); i++) wireEls[i].classList.add(cls);
+    }
+    label.textContent = step.label; label.classList.toggle('alert', !!step.alert);
+    nodeEls[p < 1 ? step.a : step.b].classList.add(step.alert ? 'alert' : 'active');
+    cap.textContent = step.text;
+  }
+  player(fig, duration, render);
+}
+
+flowFigure('fig-auth',
+  [['ผู้ถือบัตร', 'คุณ'], ['ร้านค้า', 'ร้านจักรยาน'], ['ผู้รับบัตร', 'SCB / 2C2P'], ['เครือข่ายบัตร', 'VisaNet'], ['ผู้ออกบัตร', 'KBank']],
+  [
+    { t0: 0.0, t1: 0.8, a: 0, b: 1, label: 'PAN + ฿1,000.00', text: 'คุณแตะบัตร เครื่องรูดอ่านหมายเลขบัตรและยอดเงิน' },
+    { t0: 1.0, t1: 1.8, a: 1, b: 2, label: 'คำขออนุมัติ', text: 'ร้านส่งคำขออนุมัติไปยังผู้รับบัตรของตัวเอง' },
+    { t0: 2.0, t1: 2.8, a: 2, b: 3, label: 'BIN 4523 04…', text: 'ผู้รับบัตรส่งต่อให้เครือข่าย BIN บอกว่านี่คือบัตรของ KBank' },
+    { t0: 3.0, t1: 3.8, a: 3, b: 4, label: 'คำขออนุมัติ', text: 'เครือข่ายสวิตช์ข้อความไปที่ KBank' },
+    { t0: 4.2, t1: 5.0, a: 4, b: 3, label: 'อนุมัติ · กันวงเงิน ฿1,000', text: 'KBank ตรวจวงเงินและสัญญาณทุจริต กันวงเงิน ฿1,000 แล้วตอบกลับ' },
+    { t0: 5.2, t1: 6.0, a: 3, b: 2, label: 'อนุมัติ', text: 'คำอนุมัติเดินทางกลับเส้นทางเดิม' },
+    { t0: 6.2, t1: 7.0, a: 2, b: 1, label: 'อนุมัติ', text: 'เครื่องรูดพิมพ์ใบเสร็จ มือถือคุณสั่นด้วยแจ้งเตือนจาก KBank ยังไม่มีเงินขยับเลย' },
+  ], 7.5);
+
+flowFigure('fig-promptpay',
+  [['คุณ', 'แอป KBank'], ['ธนาคารของคุณ', 'KBank'], ['สวิตช์', 'National ITMX'], ['ธนาคารของร้าน', 'SCB'], ['ร้านค้า', 'ร้านจักรยาน']],
+  [
+    { t0: 0.0, t1: 1.0, a: 4, b: 0, qr: 1, label: 'Thai QR · เลขพร้อมเพย์ · ฿1,000', text: 'ร้านโชว์ Thai QR ในนั้นมีเลขพร้อมเพย์ของร้านและยอดเงิน คุณสแกนในแอป KBank' },
+    { t0: 1.2, t1: 1.8, a: 0, b: 1, label: 'โอน ฿1,000', text: 'แอปสั่ง KBank ให้โอน ฿1,000 ไปยังเลขนั้น KBank หักเงินจากบัญชีคุณทันที' },
+    { t0: 2.0, t1: 2.6, a: 1, b: 2, label: 'เลขพร้อมเพย์ 08x…', text: 'KBank ส่งรายการให้ National ITMX ซึ่งค้นว่าเลขนี้เป็นของธนาคารไหน' },
+    { t0: 2.8, t1: 3.4, a: 2, b: 3, label: 'เครดิต ฿1,000', text: 'ITMX ส่งต่อไปยังธนาคารของร้าน' },
+    { t0: 3.6, t1: 4.2, a: 3, b: 4, label: 'ได้รับ ฿1,000 · สิ้นสุด', text: 'บัญชีร้านได้รับเงินและมือถือร้านดัง ไม่มีกันวงเงิน ไม่มี clearing ไม่มี chargeback สองธนาคารค่อยเคลียร์กันผ่านบาทเนตทีหลัง แต่เงินคุณออกไปแล้ว' },
+  ], 4.8, 100);
+
+flowFigure('fig-dispute',
+  [['ผู้ถือบัตร', 'คุณ'], ['ผู้ออกบัตร', 'KBank'], ['เครือข่ายบัตร', 'กรรมการ'], ['ผู้รับบัตร', 'SCB / 2C2P'], ['ร้านค้า', 'ร้านจักรยาน']],
+  [
+    { t0: 0.0, t1: 0.8, a: 0, b: 1, label: 'ไม่ได้รับบริการซ่อม', alert: 1, text: 'คุณโทรหาคอลเซ็นเตอร์ KBank KBank ยื่น chargeback ด้วยรหัสเหตุผล "ไม่ได้รับบริการ"' },
+    { t0: 1.0, t1: 2.0, a: 1, b: 3, label: 'chargeback ฿1,000', alert: 1, text: 'chargeback ข้ามเครือข่ายไปถึงผู้รับบัตร ผู้รับบัตรเก็บค่าธรรมเนียมข้อพิพาทจากร้านทันทีที่ได้รับ' },
+    { t0: 2.2, t1: 3.0, a: 3, b: 4, label: 'ขอหลักฐาน', alert: 1, text: 'ผู้รับบัตรขอหลักฐานจากร้าน ใบสั่งซ่อมที่เซ็นแล้ว บันทึกงาน แชต LINE รูปถ่าย' },
+    { t0: 3.2, t1: 4.0, a: 4, b: 3, label: 'ใบสั่งซ่อม + รูป', alert: 1, text: 'ร้านตอบกลับ ข้อพิพาทส่วนใหญ่จบตรงนี้ โดยฝ่ายหนึ่งยอมรับความเสียหาย' },
+    { t0: 4.2, t1: 5.2, a: 3, b: 1, label: 'representment', alert: 1, text: 'ผู้รับบัตรส่งหลักฐานกลับไป KBank ตัดสินว่าน่าเชื่อถือพอไหม' },
+    { t0: 5.4, t1: 6.2, a: 1, b: 2, label: 'ยังไม่ยอม · $600', alert: 1, text: 'ไม่มีฝ่ายไหนยอม เรื่องจึงไปถึง Visa เพื่อชี้ขาด ฝ่ายแพ้จ่าย ฿1,000 บวกค่าพิจารณา $600 ราว ฿20,000' },
+    { t0: 6.4, t1: 7.2, a: 2, b: 1, label: 'คำตัดสิน', text: 'Visa อ่านหลักฐานเทียบกับกฎแล้วตัดสินให้ฝ่ายหนึ่ง นี่คือจังหวะเดียวที่เครือข่ายเข้ามาเกี่ยวโดยตรง' },
+  ], 7.8);
+
+// ---------- settlement figure ----------
+(function () {
+  const fig = document.getElementById('fig-settle'), svg = fig.querySelector('svg'), cap = fig.querySelector('figcaption');
+  const issuers = ['KBank', 'SCB', 'Bangkok Bank'], acqs = ['2C2P', 'Omise', 'GB Prime Pay'];
+  const ix = 30, ax = 710, ny = i => 30 + i * 75, cy = i => ny(i) + 32;
+  const net = { x: 360, y: 30, w: 180, h: 200 };
+  // 12 illustrative sales: [issuer, acquirer, amount in baht]
+  const tx = [[0,0,1000],[1,2,425],[2,1,180],[0,1,2600],[1,0,750],[2,2,99],[0,2,580],[2,0,1300],[1,1,220],[0,0,150],[1,2,880],[2,1,3100]];
+  const outs = [0,0,0], ins = [0,0,0]; tx.forEach(([i,a,v]) => { outs[i] += v; ins[a] += v; });
+
+  svg.innerHTML =
+    issuers.map((n, i) => slab(ix, ny(i), 160, 56, n, 'ผู้ออกบัตร')).join('') +
+    acqs.map((n, i) => slab(ax, ny(i), 160, 56, n, 'ผู้รับบัตร')).join('') +
+    slab(net.x, net.y, net.w, net.h, 'เครือข่ายบัตร', 'ยอดสุทธิ') +
+    `<g class="ledger-lines" font-size="12">` +
+      [...issuers, ...acqs].map((n, i) =>
+        `<text x="${net.x + 12}" y="${net.y + 70 + i * 20}" fill="var(--muted)">${n.split(' ')[0]}</text>
+         <text class="num tally" x="${net.x + net.w - 12}" y="${net.y + 70 + i * 20}" text-anchor="end" fill="var(--ink)"></text>`).join('') +
+    `</g>` +
+    tx.map(() => `<g class="pk"><circle class="packet" r="5"/><text class="plabel"></text></g>`).join('') +
+    `<g class="nets">` +
+      issuers.map((_, i) => `<line class="wire" x1="${ix + 168}" y1="${cy(i)}" x2="${net.x}" y2="${net.y + 70 + i * 20 - 4}"/>
+        <text class="plabel num" x="${(ix + 168 + net.x) / 2}" y="${(cy(i) + net.y + 66 + i * 20) / 2 - 8}"></text>`).join('') +
+      acqs.map((_, i) => `<line class="wire" x1="${net.x + net.w + 8}" y1="${net.y + 130 + i * 20 - 4}" x2="${ax}" y2="${cy(i)}"/>
+        <text class="plabel num" x="${(net.x + net.w + 8 + ax) / 2}" y="${(cy(i) + net.y + 126 + i * 20) / 2 - 8}"></text>`).join('') +
+    `</g>`;
+
+  const pks = [...svg.querySelectorAll('.pk')], tallies = [...svg.querySelectorAll('.tally')];
+  const netLines = [...svg.querySelectorAll('.nets .wire')], netLabels = [...svg.querySelectorAll('.nets .plabel')];
+  const nodes = [...svg.querySelectorAll('.node')];
+  const STEP = 0.32, FLY = 0.9, PHASE2 = tx.length * STEP + FLY + 0.4;
+
+  function render(t) {
+    const acc = [0,0,0,0,0,0];
+    nodes.forEach(n => n.classList.remove('active'));
+    tx.forEach(([i, a, v], k) => {
+      const t0 = k * STEP, p = clamp01((t - t0) / FLY), g = pks[k];
+      const live = t >= t0 && p < 1 && t < PHASE2;
+      g.style.opacity = live ? 1 : 0;
+      if (live) {
+        const x = lerp(ix + 168, ax, ease(p)), y = lerp(cy(i), cy(a), ease(p));
+        g.children[0].setAttribute('cx', x); g.children[0].setAttribute('cy', y);
+        g.children[1].setAttribute('x', x); g.children[1].setAttribute('y', y - 12); g.children[1].textContent = money(v);
+        nodes[i].classList.add('active'); nodes[3 + a].classList.add('active');
+      }
+      if (p >= 1 || t >= PHASE2) { acc[i] -= v; acc[3 + a] += v; }
+    });
+    tallies.forEach((el, i) => { el.textContent = acc[i] ? (acc[i] < 0 ? '−' : '+') + money(Math.abs(acc[i])) : ''; el.setAttribute('fill', acc[i] < 0 ? 'var(--alert)' : 'var(--accent)'); });
+    const q = clamp01((t - PHASE2) / 0.8);
+    netLines.forEach((l, i) => { l.style.opacity = q; l.classList.toggle('lit', q > 0); });
+    netLabels.forEach((l, i) => { l.style.opacity = q; l.textContent = money(i < 3 ? outs[i] : ins[i - 3]); });
+    if (q > 0) nodes.forEach(n => n.classList.add('active'));
+    cap.textContent = t < PHASE2
+      ? `รายการที่ ${tx.filter((_, k) => t >= k * STEP).length} จาก ${tx.length} รายการวันนี้ แต่ละรายการคือหนี้ของผู้ออกบัตรและเครดิตของผู้รับบัตร เครือข่ายเก็บแค่ยอดรวมสะสม`
+      : `สิ้นวัน: ${tx.length} รายการกลายเป็นการโอน 6 ครั้งเป็นเงินบาท ธนาคารละครั้ง เคลียร์ผ่านบาทเนต Visa เป็นคู่สัญญาของทุกรายการ`;
+  }
+  player(fig, PHASE2 + 1.6, render);
+})();
+
+// ---------- fee split figure ----------
+(function () {
+  const fig = document.getElementById('fig-fee'), svg = fig.querySelector('svg'), cap = fig.querySelector('figcaption');
+  const X = 30, FULL = 840, TOP = 40, BH = 34, BOT = 160;
+  const cut = FULL * 0.025;
+  const parts = [
+    { name: 'KBank (interchange)', amt: 20.00, share: .80 },
+    { name: 'ผู้รับบัตร / โปรเซสเซอร์', amt: 3.50, share: .14 },
+    { name: 'Visa', amt: 1.50, share: .06 },
+  ];
+  svg.innerHTML = `
+    <text x="${X}" y="${TOP - 12}" fill="var(--muted)" font-size="11">ยอดที่คุณจ่าย</text>
+    <rect id="bar-full" x="${X}" y="${TOP}" height="${BH}" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <rect id="bar-cut" x="${X + FULL - cut}" y="${TOP}" width="${cut}" height="${BH}" fill="var(--alert)" stroke="var(--alert)"/>
+    <text id="lbl-keep" class="num" x="${X + 12}" y="${TOP + 22}" fill="var(--ink)" font-weight="600"></text>
+    <text id="lbl-cut" class="num" x="${X + FULL - cut - 8}" y="${TOP - 12}" text-anchor="end" fill="var(--alert)" font-size="11" font-weight="600"></text>
+    <path id="zoom" d="M${X + FULL - cut},${TOP + BH} L${X},${BOT} M${X + FULL},${TOP + BH} L${X + FULL},${BOT}" stroke="var(--alert)" stroke-dasharray="3 4" fill="none"/>
+    <text id="lbl-zoom" x="${X}" y="${BOT - 12}" fill="var(--muted)" font-size="11">฿25 ขยาย 40 เท่า</text>
+    ${parts.map((p, i) => `<g class="part">
+      <rect y="${BOT}" height="${BH}" fill="${i === 2 ? 'var(--alert)' : 'var(--alert-soft)'}" stroke="var(--alert)"/>
+      <text class="num amt" y="${BOT + 22}" fill="${i === 2 ? 'var(--surface)' : 'var(--ink)'}" font-weight="600"></text>
+      <text class="nm" y="${BOT + BH + 18}" fill="var(--muted)" font-size="11"></text>
+    </g>`).join('')}`;
+  const $ = s => svg.querySelector(s);
+  const partEls = [...svg.querySelectorAll('.part')];
+
+  function render(t) {
+    const fill = ease(clamp01(t / 1.0));                 // 0–1s: ฿1,000 arrives
+    const cutP = ease(clamp01((t - 1.2) / 0.6));         // 1.2–1.8s: the fee is sliced off
+    const zoomP = ease(clamp01((t - 2.0) / 0.6));        // 2–2.6s: magnify
+    $('#bar-full').setAttribute('width', FULL * fill);
+    $('#lbl-keep').textContent = fill < 1 ? money(1000 * fill) : (cutP < 1 ? '฿1,000.00' : '฿975.00 เข้าร้าน');
+    $('#bar-cut').style.opacity = cutP;
+    $('#lbl-cut').style.opacity = cutP; $('#lbl-cut').textContent = '−฿25.00 ค่าธรรมเนียมร้านค้า';
+    $('#zoom').style.opacity = zoomP; $('#lbl-zoom').style.opacity = zoomP;
+    let x = X;
+    parts.forEach((p, i) => {
+      const g = partEls[i], w = FULL * p.share, q = ease(clamp01((t - 2.6 - i * 0.7) / 0.6));
+      g.style.opacity = q > 0 ? 1 : 0;
+      g.children[0].setAttribute('x', x); g.children[0].setAttribute('width', w * q);
+      g.children[1].setAttribute('x', x + (i === 2 ? w / 2 : 12)); if (i === 2) g.children[1].setAttribute('text-anchor', 'middle');
+      g.children[1].textContent = money(p.amt * q);
+      g.children[2].setAttribute('x', x + (i === 2 ? w : 0)); if (i === 2) g.children[2].setAttribute('text-anchor', 'end');
+      g.children[2].textContent = p.name;
+      x += w;
+    });
+    cap.textContent = t < 1.2 ? 'คุณจ่าย ฿1,000.00'
+      : t < 2.0 ? 'ผู้รับบัตรหัก 2.5% ซึ่งคือค่าธรรมเนียมร้านค้า ร้านได้สุทธิ ฿975'
+      : t < 3.3 ? 'จาก ฿25 นั้น ยี่สิบบาทคือ interchange ไปที่ KBank ธนาคารที่ออกบัตรให้คุณ'
+      : t < 4.0 ? 'ผู้รับบัตรและโปรเซสเซอร์ได้ ฿3.50 เป็นค่าเครื่อง ซอฟต์แวร์ และการรับประกันความเสี่ยง'
+      : 'Visa ได้ ฿1.50 เครือข่ายที่กำหนดตัวเลขทุกตัวในนี้ จ่ายให้ตัวเองน้อยที่สุด';
+  }
+  player(fig, 5.2, render);
+})();
+</script>

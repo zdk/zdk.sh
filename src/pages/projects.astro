@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+
+const gh = (name) => `https://github.com/zdk/${name}`;
+
+const sites = [
+  ['CU Writer 1.41', 'https://cu-writer.zdk.sh', 'Thai DOS word processor, running in the browser.'],
+  ['Rajavithi Word PC 2.4', 'https://rw.zdk.sh', 'Another Thai DOS word processor, via js-dos.'],
+  ['Webamp', 'https://llama.zdk.sh', 'Winamp-style music player with custom skins.'],
+  ['JS Paint', 'https://paint.zdk.sh', 'MS Paint in the browser (1j01/jspaint).'],
+  ['ไ-โปร', 'https://i-pro.zdk.sh', 'A small chat model running fully in the browser with WebLLM.'],
+];
+
+// ponytail: hand-picked, edit by hand. Pinned repos first; full list is on GitHub.
+const repos = [
+  ['rm-safely', 'A safety net for rm.'],
+  ['pg-search-thai', 'Thai full-text search extension for PostgreSQL.'],
+  ['lowfat', 'Slim your command output. Strips noise, saves tokens.'],
+  ['lowfat-plugins', 'Community plugins for lowfat.'],
+  ['kubectl-skyline', 'Explore a Kubernetes cluster as a 3D city.'],
+  ['wakeup-neo', 'Docker hello-world as Matrix code.'],
+  ['git-critique', 'Analyze a repo to find where the codebase hurts first.'],
+  ['container-netpath', 'Display container network paths.'],
+  ['net-debug', 'Networking tools for troubleshooting Kubernetes clusters.'],
+];
+
+const contribs = [
+  ['apple/container', 'https://github.com/pulls?q=is%3Apr+author%3Azdk+repo%3Aapple%2Fcontainer', 'Fixes to volume cleanup, Kubernetes node versions, and integration tests.'],
+  ['kubernetes-sigs/krew-index', 'https://github.com/kubernetes-sigs/krew-index/pulls?q=is%3Apr+author%3Azdk', 'Published kubectl-skyline as a krew plugin.'],
+];
+---
+<Base title="Projects">
+  <h1>Projects</h1>
+
+  <h2>On zdk.sh</h2>
+  <ul class="plain">
+    {sites.map(([name, href, note]) => (
+      <li><a href={href}>{name}</a> <span class="muted">— {note}</span></li>
+    ))}
+  </ul>
+
+  <h2>Open source</h2>
+  <ul class="plain">
+    {repos.map(([name, note]) => (
+      <li><a href={gh(name)}>{name}</a> <span class="muted">— {note}</span></li>
+    ))}
+  </ul>
+  <p>More on <a href="https://github.com/zdk">GitHub</a>.</p>
+
+  <h2>Contributions</h2>
+  <ul class="plain">
+    {contribs.map(([name, href, note]) => (
+      <li><a href={href}>{name}</a> <span class="muted">— {note}</span></li>
+    ))}
+  </ul>
+</Base>

@@ -1,0 +1,21 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { fmt } from '../../articles.js';
+
+// Stubs with href point to static HTML posts, so they get no page here.
+export async function getStaticPaths() {
+  const posts = await getCollection('articles', (a) => !a.data.href);
+  return posts.map((a) => ({ params: { id: a.id }, props: { a } }));
+}
+
+const { a } = Astro.props;
+const { Content } = await render(a);
+---
+<Base title={a.data.title}>
+  <article>
+    <h1>{a.data.title}</h1>
+    <p class="muted"><time>{fmt(a.data.date)}</time></p>
+    <Content />
+  </article>
+</Base>

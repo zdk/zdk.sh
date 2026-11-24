@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+
+# Unpublished posts stay local.
+drafts/
+
+# Bucket and CloudFront ids, read by the deploy script.
+deploy.env

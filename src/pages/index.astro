@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import { getArticles, url, fmt } from '../articles.js';
+
+const latest = (await getArticles()).slice(0, 5);
+---
+<Base>
+  <h1>Di Warachet S.</h1>
+  <p class="muted">zdk · Thailand</p>
+
+  <h2>Latest articles:</h2>
+  <ul class="plain">
+    {latest.map((a) => (
+      <li><a href={url(a)}>{a.data.title}</a> <time class="meta">{fmt(a.data.date)}</time></li>
+    ))}
+  </ul>
+  <p><a href="/articles">See all articles →</a></p>
+</Base>

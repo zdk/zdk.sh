@@ -1,0 +1,483 @@
+<meta charset="utf-8">
+<title>Follow ฿1,000 Through Visa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans+Thai:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F6F6F3; --ink: #1A1C1E; --muted: #5F6468; --line: #C9CCC7;
+    --surface: #FFFFFF; --slab-top: #E6E8E3; --slab-side: #D5D8D2;
+    --accent: #1F7A52; --accent-soft: #D9EDE2; --alert: #B9453A; --alert-soft: #F4DEDB;
+    --code-bg: #ECEDE9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131516; --ink: #E7E5DF; --muted: #9AA09B; --line: #3A3F3D;
+      --surface: #1B1E1F; --slab-top: #272B2C; --slab-side: #212425;
+      --accent: #4CC48A; --accent-soft: #1E3A2C; --alert: #E0665A; --alert-soft: #40241F;
+      --code-bg: #202323;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131516; --ink: #E7E5DF; --muted: #9AA09B; --line: #3A3F3D;
+    --surface: #1B1E1F; --slab-top: #272B2C; --slab-side: #212425;
+    --accent: #4CC48A; --accent-soft: #1E3A2C; --alert: #E0665A; --alert-soft: #40241F;
+    --code-bg: #202323;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); margin: 0; padding-block: 48px 96px; padding-inline: 20px;
+         font: 17px/1.6 "IBM Plex Sans", "IBM Plex Sans Thai", system-ui, sans-serif; }
+  .wrap { max-width: 660px; margin: 0 auto; }
+  h1, h2, h3 { font-family: "Bricolage Grotesque", "IBM Plex Sans", sans-serif; text-wrap: balance; line-height: 1.1; }
+  h1 { font-size: clamp(38px, 7vw, 60px); font-weight: 700; margin: 0 0 12px; letter-spacing: -0.02em; }
+  h2 { font-size: 30px; font-weight: 700; margin: 72px 0 12px; }
+  h3 { font-size: 19px; font-weight: 700; margin: 36px 0 8px; }
+  p { margin: 0 0 18px; }
+  a { color: var(--accent); }
+  .lede { font-size: 1.15em; color: var(--muted); margin-bottom: 36px; }
+  .eyebrow { font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .stage { font: 600 13px/1 "IBM Plex Mono", monospace; letter-spacing: .06em; color: var(--muted); display: block; margin-bottom: 6px; }
+  .th { font-family: "IBM Plex Sans Thai", "IBM Plex Sans", sans-serif; color: var(--muted); }
+  code { font: 15px "IBM Plex Mono", monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+  ul { padding-left: 22px; } li { margin-bottom: 6px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 48px 0; }
+
+  /* figures break out of the reading column */
+  figure { margin: 32px calc(50% - min(50vw - 20px, 450px)); }
+  figure svg { width: 100%; height: auto; display: block; font: 13px "IBM Plex Mono", monospace; }
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
+  figcaption { color: var(--muted); font-size: .88em; min-height: 2.6em; flex: 1; }
+  .replay { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 3px;
+            padding: 5px 12px; font: 13px "IBM Plex Mono", monospace; cursor: pointer; white-space: nowrap; }
+  .replay:hover, .replay:focus-visible { border-color: var(--accent); outline: none; }
+
+  /* svg parts */
+  .node text { fill: var(--ink); font-weight: 600; }
+  .node .sub { fill: var(--muted); font-weight: 400; font-size: 11px; }
+  .node .face { transition: stroke .25s; }
+  .node.active .face { stroke: var(--accent); }
+  .node.alert .face { stroke: var(--alert); }
+  .wire { stroke: var(--line); stroke-width: 1.5; }
+  .wire.lit { stroke: var(--accent); }
+  .wire.alert { stroke: var(--alert); }
+  .packet { fill: var(--accent); }
+  .packet.alert { fill: var(--alert); }
+  .plabel { fill: var(--accent); font-size: 11px; text-anchor: middle; font-weight: 600; }
+  .plabel.alert { fill: var(--alert); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* running ledger */
+  .ledger { border: 1px solid var(--line); background: var(--surface); padding: 14px 18px; margin: 24px 0 8px; font: .82em/1.7 "IBM Plex Mono", monospace; }
+  .ledger b { display: block; font-weight: 600; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+  .ledger div { display: flex; justify-content: space-between; gap: 16px; }
+  .ledger .in { color: var(--accent); } .ledger .out { color: var(--alert); }
+
+  table { border-collapse: collapse; width: 100%; font-size: .88em; margin: 16px 0 24px; }
+  td, th { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  td.n, th.n { text-align: right; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+  .note { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; color: var(--muted); margin: 24px 0; }
+  .src { font-size: .88em; color: var(--muted); }
+</style>
+<link rel="stylesheet" href="/site.css">
+<nav class="site-nav">
+  <a href="/"><img src="/avatar.jpg" alt="zdk" width="40" height="40"></a>
+  <a href="/articles">Articles</a>
+  <a href="/projects">Projects</a>
+  <a href="https://github.com/zdk">GitHub</a>
+</nav>
+
+<div class="wrap">
+  <div class="eyebrow">Payments, explained by one receipt</div>
+  <h1>Follow ฿1,000 through Visa</h1>
+  <p class="src" style="margin-top:-4px;margin-bottom:20px"><a href="/articles/card-networks-th.html">อ่านภาษาไทย</a></p>
+  <p class="lede">You tap a KBank credit card at a bike shop in Chiang Mai. The terminal says <em>Approved</em> in under two seconds. Here is everything that happened, the four jobs the card network did, and why the shop next door only takes PromptPay.</p>
+
+  <p>Start with what Visa and Mastercard are not, because most people guess wrong. They did not issue your card. That was Kasikornbank. They did not sign up the bike shop or hand it a terminal. That was an acquiring bank such as SCB, or a payment company such as 2C2P or Omise. They do not print cards, build hardware, or lend you the money.</p>
+
+  <p>What they run is a <strong>network</strong>. Two networks, really: a telecom network that carries messages, and a banking network that moves money. On top of both sit a fee schedule and a rulebook. That is the whole company. To see why each piece matters, follow one payment from tap to receipt to bank statement.</p>
+
+  <figure id="fig-market">
+    <svg viewBox="0 0 900 250" role="img" aria-label="Issuing side and acquiring side connected only through the card network"></svg>
+    <div class="bar"><figcaption>Both sides of every card payment. The two halves never talk to each other directly. Every message and every baht crosses through the network.</figcaption></div>
+  </figure>
+
+  <p>The bike shop cannot ask KBank whether your card is good. It has no relationship with KBank. It sees cards from every Thai bank and, in Chiang Mai, from banks in Japan, China, and Germany. The card network is the one counterparty everybody has, so it becomes the one path everything takes.</p>
+
+  <p class="note">PromptPay <span class="th">(พร้อมเพย์)</span> looks like it skips the middle, but it does not. It is a different network, the domestic switch run by National ITMX under the Bank of Thailand, with a different fee model. Keep that in mind for stage 3.</p>
+
+  <h2><span class="stage">STAGE 1 · 0 to 2 seconds</span>Authorize</h2>
+
+  <p>The terminal reads your card number, the PAN. The first six to eight digits are the BIN, the bank identification number. Think of the PAN as an IP address and the BIN as its routing prefix. The network looks at the BIN and knows exactly which issuer to forward the message to. It does not need to know anything else.</p>
+
+  <figure id="fig-auth">
+    <svg viewBox="0 0 900 170" role="img" aria-label="An authorization request travels from the cardholder through the merchant, acquirer, and network to the issuer, and an approval travels back"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">Replay ↻</button></div>
+  </figure>
+
+  <p>Seven hops, and at the end nothing has moved but a promise. Now the same ฿1,000 at the shop next door, which only takes PromptPay.</p>
+
+  <figure id="fig-promptpay">
+    <svg viewBox="0 0 900 170" role="img" aria-label="A PromptPay QR code is scanned, then the transfer travels from your bank through National ITMX to the shop's bank and the shop is credited"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">Replay ↻</button></div>
+  </figure>
+
+  <p>Five hops, and the money is gone by the second one. The card flow asks a question, <em>may I?</em>, and money follows a day later. The PromptPay flow issues an instruction, <em>send</em>, and the switch only needs to know which bank owns the ID. That is why it is faster, why it is cheaper, and why there is nothing to reverse. Keep both pictures in mind; stages 2 through 4 are the card network doing the work PromptPay skips.</p>
+
+  <p>Mastercard calls this job <em>switching</em>, and that is the right mental model. The network is a very expensive, very careful packet switch. Visa runs its own data centers and leases its own fiber. Its main US facility is built to survive earthquakes and 170 mile-per-hour winds, sits behind hydraulic bollards, and has an honest-to-goodness moat.</p>
+
+  <p>Thailand has its own switch too. The Bank of Thailand requires domestic debit card transactions to be switched inside the country, which is why Thai debit cards carry the TPN mark, the Thai Payment Network, alongside or instead of Visa and Mastercard. Your credit card transaction still rides Visa.</p>
+
+  <p>The approval is not a payment yet. It is a <strong>hold</strong>. KBank has set aside ฿1,000 of your credit line and promised to pay. The bike shop has not received anything. At the end of the day the shop sends a second message called <strong>clearing</strong>, with the final amount. Clearing is what turns a promise into a debt.</p>
+
+  <aside class="ledger"><b>Where the ฿1,000 is · end of stage 1</b>
+    <div><span>Your KBank credit line</span><span class="out">−฿1,000.00 (held)</span></div>
+    <div><span>Bike shop</span><span>฿0.00 (promised)</span></div>
+  </aside>
+
+  <h2><span class="stage">STAGE 2 · overnight</span>Settle</h2>
+
+  <p>Now money has to move. KBank owes the bike shop's acquirer ฿1,000. But KBank also owes every other acquirer for every other KBank card used today, and every other issuer owes the acquirer for every other card the shop accepted. Millions of tiny debts, all crossing.</p>
+
+  <p>The network's second job is to be the counterparty in the middle. It has a settlement account relationship with every issuer and every acquirer, so it can collect from one and pay another. And it does not settle each transaction. It nets them.</p>
+
+  <figure id="fig-settle">
+    <svg viewBox="0 0 900 260" role="img" aria-label="Twelve transactions between three Thai issuers and three acquirers collapse into six net transfers through the network"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">Replay ↻</button></div>
+  </figure>
+
+  <p>Inside Thailand this is fairly routine. Visa settles domestic transactions in baht, and the banks square up through BAHTNET, the Bank of Thailand's interbank system. The interesting case is the Japanese tourist at the next table. Her issuer is in Tokyo and pays in yen. The bike shop's acquirer is in Bangkok and wants baht. Visa holds banking relationships in both countries, converts the currency, and each bank only ever deals with Visa's local bank. The network is an adapter between national banking systems. Without it, every Thai acquirer would need its own correspondent bank in every country its tourists come from.</p>
+
+  <p>Being the counterparty is also where the real risk lives. If a bank fails to pay in, Visa still has to pay out. From Visa's 2024 annual report, in US dollars because the exposure is global:</p>
+
+  <table>
+    <tr><th>Fiscal 2024</th><th class="n">Amount</th></tr>
+    <tr><td>Liquidity set aside in case a bank cannot settle</td><td class="n">$11.2B</td></tr>
+    <tr><td>Average unsettled exposure on a given day</td><td class="n">$84.3B</td></tr>
+    <tr><td>Peak unsettled exposure on a single day</td><td class="n">$137.4B</td></tr>
+  </table>
+
+  <aside class="ledger"><b>Where the ฿1,000 is · end of stage 2</b>
+    <div><span>KBank, via the network</span><span class="out">−฿1,000.00 (paid)</span></div>
+    <div><span>Bike shop's acquirer</span><span class="in">+฿1,000.00</span></div>
+    <div><span>You</span><span>owe KBank ฿1,000 next statement</span></div>
+  </aside>
+
+  <h2><span class="stage">STAGE 3 · the fee</span>Split</h2>
+
+  <p>The bike shop does not get ฿1,000. On a typical Thai credit card sale it gets around ฿975. The missing ฿25 is the <strong>merchant discount rate</strong>, and where it goes explains almost everything about why cards work the way they do, and why so many Thai shops would rather you scan a QR code.</p>
+
+  <figure id="fig-fee">
+    <svg viewBox="0 0 900 250" role="img" aria-label="A 1,000 baht bar with 25 baht removed, magnified to show 20 baht to the issuer, 3.50 to the processor, and 1.50 to the network"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">Replay ↻</button></div>
+  </figure>
+
+  <p>Read that again. The company whose name is on the card keeps a baht and a half. The bank that issued it keeps twenty. The network sets both of those numbers, and it deliberately pays itself the least.</p>
+
+  <p>The stated reason is risk. If your card is stolen, zero-liability rules mean KBank eats the loss, not you and not the shop. If you never pay your bill, KBank still paid the shop. The twenty baht is the price of that guarantee. Merchants would say it is also the price of a duopoly, and they are not entirely wrong.</p>
+
+  <p>But the fat issuer margin is also the engine. Two percent on every swipe is what funds the cashback, the airline miles, and the "0% for 10 months" installment plans Thai banks advertise at every mall. Rewards pull in cardholders. Cardholders pull in merchants. More merchants make the card more useful, which pulls in more cardholders. The network takes a sliver of an ever larger pie.</p>
+
+  <h3>Why the noodle shop says PromptPay only</h3>
+
+  <p>Now put the same ฿1,000 through PromptPay. The Bank of Thailand priced the rail so a consumer transfer is free and a merchant QR payment costs the shop nothing or close to it. There is no interchange, so there is no rewards engine, but there is also no ฿25 leaving the till. For a small shop running on thin margins, that decides it.</p>
+
+  <p>The Bank of Thailand also capped debit card fees for merchants at 0.55%, which is why your debit card is cheap for the shop and your credit card is not. And it is why the "credit card +3%" sign you see at markets exists. Passing the fee on breaks the network's rules, but enforcement against a stall in Chatuchak is not a priority for anyone.</p>
+
+  <p class="note">The European Union got the same result by law: interchange is capped at 0.3%. Thailand got it by building a public rival. Either way, once a merchant has a near-free rail, card rewards get thinner and acceptance gets pickier.</p>
+
+  <aside class="ledger"><b>Where the ฿1,000 is · after fees</b>
+    <div><span>Bike shop</span><span class="in">+฿975.00</span></div>
+    <div><span>KBank (interchange)</span><span class="in">+฿20.00</span></div>
+    <div><span>Acquirer / processor</span><span class="in">+฿3.50</span></div>
+    <div><span>Visa (assessment)</span><span class="in">+฿1.50</span></div>
+  </aside>
+
+  <h2><span class="stage">STAGE 4 · when it goes wrong</span>Dispute</h2>
+
+  <p>Suppose the bike never gets fixed and the shop stops answering LINE. With cash or PromptPay, your remedy is the Office of the Consumer Protection Board or small claims court, and the money is already gone. With a card, you call KBank. The fourth job of the network is to write the rules that make that call work.</p>
+
+  <p>Visa's rulebook runs to 923 pages and is public. It covers how the logo may be printed, what data a transaction must carry, how fast each party must respond, and, most importantly, who is liable when. Banks that break the rules face fines from $25,000 to $1,000,000 a month, or expulsion.</p>
+
+  <figure id="fig-dispute">
+    <svg viewBox="0 0 900 170" role="img" aria-label="A chargeback passes between issuer and acquirer several times before escalating to the network for arbitration"></svg>
+    <div class="bar"><figcaption></figcaption><button class="replay" type="button">Replay ↻</button></div>
+  </figure>
+
+  <p>Notice that the network barely appears. A dispute is forced arbitration between KBank and the shop's acquirer. They trade evidence until one side gives up and accepts the loss. Visa only steps in if neither yields, and it charges $600 to look, $1,000 for an appeal, paid by the loser on top of the disputed amount. For a ฿1,000 repair, that referee fee is about twenty times the bill.</p>
+
+  <p>Those fees are the design. Nobody wants to reach the referee. Issuers usually refund the customer and write off small amounts. Merchants refund unhappy customers on their own, because their acquirer bills them a dispute fee the moment a chargeback is filed, win or lose. The rules do not so much resolve disputes as make disputes expensive enough that everyone resolves them first.</p>
+
+  <p>It is not a fair system. It is a fast one. It also leans toward the cardholder, which is what makes a tourist comfortable handing a card to a stranger in a country whose courts they will never use. That protection is the one thing PromptPay does not give you. A QR transfer is final the moment you press confirm.</p>
+
+  <hr>
+
+  <h2>What you would need to build one</h2>
+
+  <p>Strip the brand away and a card network is four things. Thailand actually built one, so the checklist has a local column.</p>
+
+  <table>
+    <tr><th>Job</th><th>What it is</th><th>Visa</th><th>PromptPay</th></tr>
+    <tr><td>Switch</td><td>Route messages to the right bank in under a second</td><td>VisaNet, by BIN</td><td>National ITMX, by phone number or citizen ID</td></tr>
+    <tr><td>Settle</td><td>Net and move money between banks</td><td>Visa as counterparty, any currency</td><td>BAHTNET, baht only</td></tr>
+    <tr><td>Price</td><td>Set fees so both sides want to join</td><td>~2% interchange funds rewards</td><td>Near zero, set by the central bank</td></tr>
+    <tr><td>Rule</td><td>Liability rules and a dispute process</td><td>923 pages, chargebacks</td><td>Transfers are final</td></tr>
+  </table>
+
+  <p>The first is engineering. The second is a balance sheet. The third and fourth are choices. Thailand chose cheap and final. Visa chose expensive and reversible. Both are networks. The receipt just tells you which one you rode.</p>
+
+  <p class="src">Sources and further reading: <a href="https://tautology.town/2026/06/01/card-networks.html">What do Visa and Mastercard do?</a> (tautology.town), which this page reframes for Thailand; Visa Inc. 2024 Form 10-K for the settlement figures; Visa Core Rules and Visa Product and Service Rules for the dispute fees; Bank of Thailand notices on debit card MDR and PromptPay pricing. The ฿25 fee split is an illustrative Thai credit card average. Real rates vary by card type, merchant category, and acquirer.</p>
+</div>
+
+<script>
+// ---------- shared bits ----------
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp01 = t => Math.min(1, Math.max(0, t));
+const ease = t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+const money = n => '฿' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Isometric slab: front face + top + right side. Colors come from theme tokens.
+function slab(x, y, w, h, label, sub = '') {
+  const d = 8;
+  return `<g class="node" transform="translate(${x},${y})">
+    <path class="face" d="M0,${d} L${d},0 H${w + d} L${w},${d}Z" fill="var(--slab-top)" stroke="var(--line)"/>
+    <path class="face" d="M${w},${d} L${w + d},0 V${h - d} L${w},${h}Z" fill="var(--slab-side)" stroke="var(--line)"/>
+    <path class="face" d="M0,${d} H${w} V${h} H0Z" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="${w / 2}" y="${h / 2 + d + (sub ? -2 : 4)}" text-anchor="middle">${label}</text>
+    ${sub ? `<text class="sub" x="${w / 2}" y="${h / 2 + d + 14}" text-anchor="middle">${sub}</text>` : ''}
+  </g>`;
+}
+
+// Player: render(t) is pure. Page shows the final frame at rest, plays on scroll, replays on click.
+function player(fig, duration, render) {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let raf, start;
+  const stop = () => cancelAnimationFrame(raf);
+  const play = () => {
+    stop();
+    if (reduced) return render(duration);
+    start = performance.now();
+    const tick = now => {
+      const t = (now - start) / 1000;
+      render(Math.min(t, duration));
+      if (t < duration) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  };
+  render(duration);
+  fig.querySelector('.replay').onclick = play;
+  new IntersectionObserver(([e]) => e.isIntersecting ? play() : stop(), { threshold: .4 }).observe(fig);
+}
+
+// ---------- market figure (static) ----------
+(function () {
+  const svg = document.querySelector('#fig-market svg');
+  svg.innerHTML = `
+    <text x="130" y="22" fill="var(--muted)" font-size="11" letter-spacing=".08em">ISSUING SIDE</text>
+    <text x="770" y="22" text-anchor="end" fill="var(--muted)" font-size="11" letter-spacing=".08em">ACQUIRING SIDE</text>
+    <rect x="30" y="34" width="250" height="200" fill="none" stroke="var(--line)" stroke-dasharray="3 4"/>
+    <rect x="620" y="34" width="250" height="200" fill="none" stroke="var(--line)" stroke-dasharray="3 4"/>
+    ${slab(70, 60, 160, 56, 'Card issuer', 'KBank · SCB · Krungsri')}
+    ${slab(70, 150, 160, 56, 'Cardholder', 'you')}
+    ${slab(660, 60, 160, 56, 'Acquirer', 'SCB · 2C2P · Omise')}
+    ${slab(660, 150, 160, 56, 'Merchant', 'the bike shop')}
+    <line class="wire" x1="150" y1="116" x2="150" y2="150"/>
+    <line class="wire" x1="740" y1="116" x2="740" y2="150"/>
+    ${slab(360, 100, 170, 60, 'Card network', 'Visa · Mastercard')}
+    <line class="wire lit" x1="280" y1="134" x2="360" y2="134"/>
+    <line class="wire lit" x1="538" y1="134" x2="620" y2="134"/>
+    <text x="450" y="200" text-anchor="middle" fill="var(--muted)" font-size="11">no direct path between the two halves</text>`;
+})();
+
+// ---------- generic flow figure: nodes in a row, packet steps ----------
+const QR = ['1111101', '1000101', '1011100', '1000110', '1111101', '0000011', '1110110'];
+function flowFigure(id, names, steps, duration, top = 70) {
+  const fig = document.getElementById(id), svg = fig.querySelector('svg'), cap = fig.querySelector('figcaption');
+  const W = 140, H = 56, GAP = (840 - names.length * W) / (names.length - 1);
+  const centers = names.map((_, i) => [30 + i * (W + GAP) + W / 2, top + H / 2]);
+  svg.innerHTML =
+    centers.slice(1).map(([x2, y], i) =>
+      `<line class="wire" x1="${centers[i][0] + W / 2 + 8}" y1="${y}" x2="${x2 - W / 2}" y2="${y}"/>`).join('') +
+    names.map((n, i) => slab(30 + i * (W + GAP), 70, W, H, ...[].concat(n))).join('') +
+    `<circle class="packet" r="6"/><text class="plabel"></text>` +
+    // Thai QR glyph: flies above the row when a step is a scan, not a message
+    `<g class="qr" opacity="0"><rect x="-14" y="-14" width="28" height="28" fill="var(--surface)" stroke="var(--line)"/>` +
+      QR.flatMap((row, r) => [...row].map((c, i) => c === '1' ? `<rect x="${-10.5 + i * 3}" y="${-10.5 + r * 3}" width="3" height="3" fill="var(--ink)"/>` : '')).join('') +
+    `</g>`;
+  const nodeEls = [...svg.querySelectorAll('.node')], wireEls = [...svg.querySelectorAll('.wire')];
+  const packet = svg.querySelector('.packet'), label = svg.querySelector('.plabel'), qr = svg.querySelector('.qr');
+
+  function render(t) {
+    nodeEls.forEach(n => n.classList.remove('active', 'alert'));
+    wireEls.forEach(w => w.classList.remove('lit', 'alert'));
+    const step = steps.find(s => t >= s.t0 && t <= s.t1) || [...steps].reverse().find(s => t > s.t1);
+    if (!step) return;
+    const p = ease(clamp01((t - step.t0) / (step.t1 - step.t0)));
+    const [x1, y] = centers[step.a], [x2] = centers[step.b];
+    const cls = step.alert ? 'alert' : 'lit';
+    const x = lerp(x1, x2, p);
+    packet.setAttribute('opacity', step.qr ? 0 : 1);
+    qr.setAttribute('opacity', step.qr ? 1 : 0);
+    if (step.qr) {
+      qr.setAttribute('transform', `translate(${x},${y - 60})`);   // over the top of the row
+      label.setAttribute('x', x); label.setAttribute('y', y - 82);
+    } else {
+      packet.setAttribute('cx', x); packet.setAttribute('cy', y);
+      packet.classList.toggle('alert', !!step.alert);
+      label.setAttribute('x', x); label.setAttribute('y', y - 16);
+      for (let i = Math.min(step.a, step.b); i < Math.max(step.a, step.b); i++) wireEls[i].classList.add(cls);
+    }
+    label.textContent = step.label; label.classList.toggle('alert', !!step.alert);
+    nodeEls[p < 1 ? step.a : step.b].classList.add(step.alert ? 'alert' : 'active');
+    cap.textContent = step.text;
+  }
+  player(fig, duration, render);
+}
+
+flowFigure('fig-auth',
+  [['Cardholder', 'you'], ['Merchant', 'bike shop'], ['Acquirer', 'SCB / 2C2P'], ['Card network', 'VisaNet'], ['Issuer', 'KBank']],
+  [
+    { t0: 0.0, t1: 0.8, a: 0, b: 1, label: 'PAN + ฿1,000.00', text: 'You tap. The terminal reads your card number and the amount.' },
+    { t0: 1.0, t1: 1.8, a: 1, b: 2, label: 'auth request', text: 'The shop sends an authorization request to its acquirer.' },
+    { t0: 2.0, t1: 2.8, a: 2, b: 3, label: 'BIN 4523 04…', text: 'The acquirer hands it to the network. The BIN says this is a KBank card.' },
+    { t0: 3.0, t1: 3.8, a: 3, b: 4, label: 'auth request', text: 'The network switches the message to KBank.' },
+    { t0: 4.2, t1: 5.0, a: 4, b: 3, label: 'APPROVED · hold ฿1,000', text: 'KBank checks your credit line and fraud signals, places a ฿1,000 hold, and answers.' },
+    { t0: 5.2, t1: 6.0, a: 3, b: 2, label: 'APPROVED', text: 'The approval travels back the same path.' },
+    { t0: 6.2, t1: 7.0, a: 2, b: 1, label: 'APPROVED', text: 'The terminal prints the receipt and your phone buzzes with a KBank alert. No money has moved yet.' },
+  ], 7.5);
+
+flowFigure('fig-promptpay',
+  [['You', 'KBank app'], ['Your bank', 'KBank'], ['Switch', 'National ITMX'], ['Shop\'s bank', 'SCB'], ['Merchant', 'bike shop']],
+  [
+    { t0: 0.0, t1: 1.0, a: 4, b: 0, qr: 1, label: 'Thai QR · PromptPay ID · ฿1,000', text: 'The shop shows a Thai QR code. It carries the shop\'s PromptPay ID and the amount. You scan it in the KBank app.' },
+    { t0: 1.2, t1: 1.8, a: 0, b: 1, label: 'send ฿1,000', text: 'Your app tells KBank to send ฿1,000 to that ID. KBank debits your account right now.' },
+    { t0: 2.0, t1: 2.6, a: 1, b: 2, label: 'PromptPay ID 08x…', text: 'KBank passes the transfer to National ITMX, which looks up which bank owns the ID.' },
+    { t0: 2.8, t1: 3.4, a: 2, b: 3, label: 'credit ฿1,000', text: 'ITMX routes it to the shop\'s bank.' },
+    { t0: 3.6, t1: 4.2, a: 3, b: 4, label: '฿1,000 received · final', text: 'The shop\'s account is credited and its phone pings. No hold, no clearing, no chargeback. The two banks square up through BAHTNET later, but your money already left.' },
+  ], 4.8, 100);
+
+flowFigure('fig-dispute',
+  [['Cardholder', 'you'], ['Issuer', 'KBank'], ['Card network', 'referee'], ['Acquirer', 'SCB / 2C2P'], ['Merchant', 'bike shop']],
+  [
+    { t0: 0.0, t1: 0.8, a: 0, b: 1, label: 'I never got the repair', alert: 1, text: 'You call the KBank hotline. KBank files a chargeback under the reason code for services not provided.' },
+    { t0: 1.0, t1: 2.0, a: 1, b: 3, label: 'chargeback ฿1,000', alert: 1, text: 'The chargeback crosses the network to the acquirer. The acquirer bills the shop a dispute fee on arrival.' },
+    { t0: 2.2, t1: 3.0, a: 3, b: 4, label: 'evidence?', alert: 1, text: 'The acquirer asks the shop for proof: a signed work order, a repair log, a LINE chat, a photo.' },
+    { t0: 3.2, t1: 4.0, a: 4, b: 3, label: 'work order + photos', alert: 1, text: 'The shop responds. Most disputes end here, with one side accepting the loss.' },
+    { t0: 4.2, t1: 5.2, a: 3, b: 1, label: 'representment', alert: 1, text: 'The acquirer sends the evidence back. KBank decides whether it is convincing.' },
+    { t0: 5.4, t1: 6.2, a: 1, b: 2, label: 'still disputed · $600', alert: 1, text: 'Neither side yields, so it goes to Visa for arbitration. The loser pays the ฿1,000 plus a $600 review fee, about ฿20,000.' },
+    { t0: 6.4, t1: 7.2, a: 2, b: 1, label: 'ruling', text: 'Visa reads the evidence against its rules and rules for one side. This is the only moment the network is directly involved.' },
+  ], 7.8);
+
+// ---------- settlement figure ----------
+(function () {
+  const fig = document.getElementById('fig-settle'), svg = fig.querySelector('svg'), cap = fig.querySelector('figcaption');
+  const issuers = ['KBank', 'SCB', 'Bangkok Bank'], acqs = ['2C2P', 'Omise', 'GB Prime Pay'];
+  const ix = 30, ax = 710, ny = i => 30 + i * 75, cy = i => ny(i) + 32;
+  const net = { x: 360, y: 30, w: 180, h: 200 };
+  // 12 illustrative sales: [issuer, acquirer, amount in baht]
+  const tx = [[0,0,1000],[1,2,425],[2,1,180],[0,1,2600],[1,0,750],[2,2,99],[0,2,580],[2,0,1300],[1,1,220],[0,0,150],[1,2,880],[2,1,3100]];
+  const outs = [0,0,0], ins = [0,0,0]; tx.forEach(([i,a,v]) => { outs[i] += v; ins[a] += v; });
+
+  svg.innerHTML =
+    issuers.map((n, i) => slab(ix, ny(i), 160, 56, n, 'issuer')).join('') +
+    acqs.map((n, i) => slab(ax, ny(i), 160, 56, n, 'acquirer')).join('') +
+    slab(net.x, net.y, net.w, net.h, 'Card network', 'net position') +
+    `<g class="ledger-lines" font-size="12">` +
+      [...issuers, ...acqs].map((n, i) =>
+        `<text x="${net.x + 12}" y="${net.y + 70 + i * 20}" fill="var(--muted)">${n.split(' ')[0]}</text>
+         <text class="num tally" x="${net.x + net.w - 12}" y="${net.y + 70 + i * 20}" text-anchor="end" fill="var(--ink)"></text>`).join('') +
+    `</g>` +
+    tx.map(() => `<g class="pk"><circle class="packet" r="5"/><text class="plabel"></text></g>`).join('') +
+    `<g class="nets">` +
+      issuers.map((_, i) => `<line class="wire" x1="${ix + 168}" y1="${cy(i)}" x2="${net.x}" y2="${net.y + 70 + i * 20 - 4}"/>
+        <text class="plabel num" x="${(ix + 168 + net.x) / 2}" y="${(cy(i) + net.y + 66 + i * 20) / 2 - 8}"></text>`).join('') +
+      acqs.map((_, i) => `<line class="wire" x1="${net.x + net.w + 8}" y1="${net.y + 130 + i * 20 - 4}" x2="${ax}" y2="${cy(i)}"/>
+        <text class="plabel num" x="${(net.x + net.w + 8 + ax) / 2}" y="${(cy(i) + net.y + 126 + i * 20) / 2 - 8}"></text>`).join('') +
+    `</g>`;
+
+  const pks = [...svg.querySelectorAll('.pk')], tallies = [...svg.querySelectorAll('.tally')];
+  const netLines = [...svg.querySelectorAll('.nets .wire')], netLabels = [...svg.querySelectorAll('.nets .plabel')];
+  const nodes = [...svg.querySelectorAll('.node')];
+  const STEP = 0.32, FLY = 0.9, PHASE2 = tx.length * STEP + FLY + 0.4;
+
+  function render(t) {
+    const acc = [0,0,0,0,0,0];
+    nodes.forEach(n => n.classList.remove('active'));
+    tx.forEach(([i, a, v], k) => {
+      const t0 = k * STEP, p = clamp01((t - t0) / FLY), g = pks[k];
+      const live = t >= t0 && p < 1 && t < PHASE2;
+      g.style.opacity = live ? 1 : 0;
+      if (live) {
+        const x = lerp(ix + 168, ax, ease(p)), y = lerp(cy(i), cy(a), ease(p));
+        g.children[0].setAttribute('cx', x); g.children[0].setAttribute('cy', y);
+        g.children[1].setAttribute('x', x); g.children[1].setAttribute('y', y - 12); g.children[1].textContent = money(v);
+        nodes[i].classList.add('active'); nodes[3 + a].classList.add('active');
+      }
+      if (p >= 1 || t >= PHASE2) { acc[i] -= v; acc[3 + a] += v; }
+    });
+    tallies.forEach((el, i) => { el.textContent = acc[i] ? (acc[i] < 0 ? '−' : '+') + money(Math.abs(acc[i])) : ''; el.setAttribute('fill', acc[i] < 0 ? 'var(--alert)' : 'var(--accent)'); });
+    const q = clamp01((t - PHASE2) / 0.8);
+    netLines.forEach((l, i) => { l.style.opacity = q; l.classList.toggle('lit', q > 0); });
+    netLabels.forEach((l, i) => { l.style.opacity = q; l.textContent = money(i < 3 ? outs[i] : ins[i - 3]); });
+    if (q > 0) nodes.forEach(n => n.classList.add('active'));
+    cap.textContent = t < PHASE2
+      ? `${tx.filter((_, k) => t >= k * STEP).length} of ${tx.length} sales today. Each one is a debit for an issuer and a credit for an acquirer. The network only keeps the running total.`
+      : `End of day: ${tx.length} sales become 6 transfers in baht, one per bank, squared up through BAHTNET. Visa is the counterparty on every one.`;
+  }
+  player(fig, PHASE2 + 1.6, render);
+})();
+
+// ---------- fee split figure ----------
+(function () {
+  const fig = document.getElementById('fig-fee'), svg = fig.querySelector('svg'), cap = fig.querySelector('figcaption');
+  const X = 30, FULL = 840, TOP = 40, BH = 34, BOT = 160;
+  const cut = FULL * 0.025;
+  const parts = [
+    { name: 'KBank (interchange)', amt: 20.00, share: .80 },
+    { name: 'Acquirer / processor', amt: 3.50, share: .14 },
+    { name: 'Visa', amt: 1.50, share: .06 },
+  ];
+  svg.innerHTML = `
+    <text x="${X}" y="${TOP - 12}" fill="var(--muted)" font-size="11" letter-spacing=".08em">WHAT YOU PAID</text>
+    <rect id="bar-full" x="${X}" y="${TOP}" height="${BH}" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <rect id="bar-cut" x="${X + FULL - cut}" y="${TOP}" width="${cut}" height="${BH}" fill="var(--alert)" stroke="var(--alert)"/>
+    <text id="lbl-keep" class="num" x="${X + 12}" y="${TOP + 22}" fill="var(--ink)" font-weight="600"></text>
+    <text id="lbl-cut" class="num" x="${X + FULL - cut - 8}" y="${TOP - 12}" text-anchor="end" fill="var(--alert)" font-size="11" font-weight="600"></text>
+    <path id="zoom" d="M${X + FULL - cut},${TOP + BH} L${X},${BOT} M${X + FULL},${TOP + BH} L${X + FULL},${BOT}" stroke="var(--alert)" stroke-dasharray="3 4" fill="none"/>
+    <text id="lbl-zoom" x="${X}" y="${BOT - 12}" fill="var(--muted)" font-size="11" letter-spacing=".08em">THE ฿25, MAGNIFIED 40×</text>
+    ${parts.map((p, i) => `<g class="part">
+      <rect y="${BOT}" height="${BH}" fill="${i === 2 ? 'var(--alert)' : 'var(--alert-soft)'}" stroke="var(--alert)"/>
+      <text class="num amt" y="${BOT + 22}" fill="${i === 2 ? 'var(--surface)' : 'var(--ink)'}" font-weight="600"></text>
+      <text class="nm" y="${BOT + BH + 18}" fill="var(--muted)" font-size="11"></text>
+    </g>`).join('')}`;
+  const $ = s => svg.querySelector(s);
+  const partEls = [...svg.querySelectorAll('.part')];
+
+  function render(t) {
+    const fill = ease(clamp01(t / 1.0));                 // 0–1s: ฿1,000 arrives
+    const cutP = ease(clamp01((t - 1.2) / 0.6));         // 1.2–1.8s: the fee is sliced off
+    const zoomP = ease(clamp01((t - 2.0) / 0.6));        // 2–2.6s: magnify
+    $('#bar-full').setAttribute('width', FULL * fill);
+    $('#lbl-keep').textContent = fill < 1 ? money(1000 * fill) : (cutP < 1 ? '฿1,000.00' : '฿975.00 to the shop');
+    $('#bar-cut').style.opacity = cutP;
+    $('#lbl-cut').style.opacity = cutP; $('#lbl-cut').textContent = '−฿25.00 merchant discount';
+    $('#zoom').style.opacity = zoomP; $('#lbl-zoom').style.opacity = zoomP;
+    let x = X;
+    parts.forEach((p, i) => {
+      const g = partEls[i], w = FULL * p.share, q = ease(clamp01((t - 2.6 - i * 0.7) / 0.6));
+      g.style.opacity = q > 0 ? 1 : 0;
+      g.children[0].setAttribute('x', x); g.children[0].setAttribute('width', w * q);
+      g.children[1].setAttribute('x', x + (i === 2 ? w / 2 : 12)); if (i === 2) g.children[1].setAttribute('text-anchor', 'middle');
+      g.children[1].textContent = money(p.amt * q);
+      g.children[2].setAttribute('x', x + (i === 2 ? w : 0)); if (i === 2) g.children[2].setAttribute('text-anchor', 'end');
+      g.children[2].textContent = p.name;
+      x += w;
+    });
+    cap.textContent = t < 1.2 ? 'You pay ฿1,000.00.'
+      : t < 2.0 ? 'The acquirer takes 2.5%, the merchant discount rate. The shop nets ฿975.'
+      : t < 3.3 ? 'Of that ฿25, twenty baht is interchange. It goes to KBank, the bank that issued your card.'
+      : t < 4.0 ? 'The acquirer and processor keep ฿3.50 for the terminal, software, and underwriting.'
+      : 'Visa keeps ฿1.50. The network that set every one of these numbers pays itself the least.';
+  }
+  player(fig, 5.2, render);
+})();
+</script>

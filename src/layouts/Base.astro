@@ -1,0 +1,27 @@
+---
+const { title } = Astro.props;
+const full = title ? `${title} — zdk` : 'zdk';
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{full}</title>
+  <link rel="icon" href="/avatar.jpg">
+  <link rel="alternate" type="application/rss+xml" title="zdk" href="/feed.xml">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="/"><img src="/avatar.jpg" alt="zdk" width="40" height="40"></a>
+    <a href="/articles">Articles</a>
+    <a href="/projects">Projects</a>
+    <a href="https://github.com/zdk">GitHub</a>
+  </nav>
+  <main><slot /></main>
+  <footer class="meta">
+    © {new Date().getFullYear()} zdk.sh · <a href="/feed.xml">RSS</a> · <a href="https://github.com/zdk/zdk.sh">Source</a>
+  </footer>
+</body>
+</html>
